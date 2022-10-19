@@ -7,7 +7,7 @@ def json_read(path: str) -> json:
     return json_file
 
 
-def write_to_json(data: dict, path: str, indent: int) -> None:
+def write_to_json(data: dict, path: str, indent: int=0) -> None:
     json_object = json.dumps(data, indent=indent)
     with open(path, "w") as outfile:
         outfile.write(json_object)

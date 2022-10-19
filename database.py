@@ -14,7 +14,7 @@ class DataBase:
         if self.output_file_name in os.listdir():
             self.users = utils.json_read(self.output_file_name)
         else:
-            utils.write_to_json(self.users,self.output_file_name,2)
+            utils.write_to_json(self.users,self.output_file_name)
         print("[DB] loaded data.")
 
     def add(self,user):

@@ -41,9 +41,12 @@ class ConnectionHandler:
         self.db.load()
         self.clients = set()
 
-    def broadcast(self,msg:str):
+
+    def broadcast(self,msg:str,sender,name):
         for client in self.clients:
-            client.send(msg.encode())
+            if client is sender:
+                client.send(f"You:> {msg}".encode())
+            else:client.send(f"{name}:> {msg}".encode())
 
     def new_connection(self,client:socket.socket):
         self.clients.add(client)
@@ -56,12 +59,21 @@ class ConnectionHandler:
                 req = client.recv(self.buffer).decode()
                 print(f"[Server] res = {req}")
                 req = json.loads(req)
-                if req["type"] == "login":
-                    self.db.add(req["data"])
-                    client.send("ok".encode())
-                    self.db.commit()
+                if req["type"] == "register":
+                    if req['data']['username'] not in self.db.users:
+                        self.db.add(req["data"])
+                        client.send("ok".encode())
+                        self.db.commit()
+                    else:
+                        client.send("error".encode())
+                elif req["type"] == "login":
+                    if req['data']['username'] not in self.db.users:
+                        client.send("error".encode())
+                    if req['data']['password'] != self.db.users.get(req['data']['username'])["password"]:
+                        client.send("error".encode())
+                    else: client.send(f"{req['data']['username']} logged in.".encode())
                 elif req["type"] == "msg":
-                    self.broadcast(req["data"])
+                    self.broadcast(req["data"]['msg'],client,req['data']['name'])
 
 
             except Exception as e:
@@ -72,9 +84,8 @@ class ConnectionHandler:
 
 
 if __name__ == '__main__':
-    try:
-        server = BindingConnection("127.0.0.1",5555)
-        conn = ConnectionHandler()
-        server.start(conn.new_connection)
-    except Exception as e:
-        print(e)
+
+    server = BindingConnection("127.0.0.1",5555)
+    conn = ConnectionHandler()
+    server.start(conn.new_connection)
+

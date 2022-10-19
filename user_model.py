@@ -7,3 +7,5 @@ class User(DBModel):
     username:str
     password:str
 
+
+

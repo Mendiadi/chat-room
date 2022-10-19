@@ -1,6 +1,10 @@
 {
- "adi": {
-  "username": "adi",
-  "password": "111"
- }
+  "adi": {
+    "username": "adi",
+    "password": "111"
+  },
+  "adi2": {
+    "username": "adi2",
+    "password": "1111"
+  }
 }
