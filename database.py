@@ -32,7 +32,7 @@ class DataBase:
 
     def remove(self, user):
         if user.username not in self.users:
-            print(f"[DB] Cant remove! user {user.username} not exists.")
+            print(f"[DB] Cant remove! user {user.username} not Exists.")
         else:
             self.users.pop(user.username)
             print(f"[DB] User {user.username} Removed.")

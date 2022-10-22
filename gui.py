@@ -56,7 +56,7 @@ class Screen:
         self.win.configure(background="green")
         self.send_btn = tk.Button(self.win, text="Send", command=self.send)
         self.chat_entry = tk.Entry(self.win)
-        self.text_box = ScrolledText(self.win,state=tk.DISABLED)
+        self.text_box = ScrolledText(self.win, state=tk.DISABLED)
         self._job = None
         self.login_frame()
 
@@ -71,21 +71,21 @@ class Screen:
         self.username_verify = tk.Label(self.win, fg="red", text="Invalid", font="none 10 bold", bg="green")
         self.password_verify = tk.Label(self.win, fg="red", text="Invalid", font="none 10 bold", bg="green")
         self.head_login_frame_text = tk.Label(self.win, text="Please Login or SignUp",
-                                                   font="none 20 bold", bg="green")
+                                              font="none 20 bold", bg="green")
         self.username_text = tk.Label(self.win, text="Username:", font="none 12 bold", bg="green")
         self.password_text = tk.Label(self.win, text="Password:", font="none 12 bold", bg="green")
 
         # ********* BUTTONS *******#
         self.show_hide_btn = tk.Button(self.win, text="Show", font="none 8 bold", command=self.show_hide,
-                                            bg="green",
-                                            highlightthickness=0, border=0)
+                                       bg="green",
+                                       highlightthickness=0, border=0)
         self.register_btn = tk.Button(self.win, text="Sign up & Login", command=self.register, bg="gray",
                                       font="none 10 bold", state=tk.DISABLED)
         self.log_in_btn = tk.Button(self.win, text="Login", command=self.login, bg="gray", font="none 10 bold",
-                                         state=tk.DISABLED)
+                                    state=tk.DISABLED)
         self.checkVar1 = tk.IntVar()
         self.keep_me_log_in_btn = tk.Checkbutton(self.win, text="keep me login", variable=self.checkVar1
-                                                      , onvalue=1, offvalue=0, height=1, width=14, bg="green")
+                                                 , onvalue=1, offvalue=0, height=1, width=14, bg="green")
 
         # ********* CANVASES *******#
         self.decorate_label_u = tk.Canvas(self.win, width=100, height=2.0, bg="black", highlightthickness=0)
@@ -167,7 +167,7 @@ class Screen:
         while True:
             res = self.network.client.recv(1048).decode()
             if res == "ok":
-                messagebox.showinfo(title="Register",message="YOU REGISTER COMPLETE")
+                messagebox.showinfo(title="Register", message="YOU REGISTER COMPLETE")
 
             elif "logged in" in res:
                 self.destroy_login_frame()
