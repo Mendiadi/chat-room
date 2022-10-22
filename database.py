@@ -1,7 +1,8 @@
 import os
 
-from  user_model import User
+from user_model import User
 import utils
+
 
 class DataBase:
     output_file_name = "db.json"
@@ -14,11 +15,11 @@ class DataBase:
         if self.output_file_name in os.listdir():
             self.users = utils.json_read(self.output_file_name)
         else:
-            utils.write_to_json(self.users,self.output_file_name)
+            utils.write_to_json(self.users, self.output_file_name)
         print("[DB] loaded data.")
 
-    def add(self,user):
-        if not isinstance(user,dict):
+    def add(self, user):
+        if not isinstance(user, dict):
             user_json = user.to_json()
         else:
             user = User(**user)
@@ -29,7 +30,7 @@ class DataBase:
         else:
             print(f"[DB] User {user.username} Already Exists.")
 
-    def remove(self,user):
+    def remove(self, user):
         if user.username not in self.users:
             print(f"[DB] Cant remove! user {user.username} not exists.")
         else:
@@ -37,5 +38,5 @@ class DataBase:
             print(f"[DB] User {user.username} Removed.")
 
     def commit(self):
-        utils.write_to_json(self.users,self.output_file_name,len(self.users))
+        utils.write_to_json(self.users, self.output_file_name, len(self.users))
         print("[DB] commited.")
