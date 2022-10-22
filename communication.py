@@ -90,6 +90,6 @@ class ConnectionHandler:
 
 
 if __name__ == '__main__':
-    server = BindingConnection("127.0.0.1", 5555)
+    server = BindingConnection("192.168.56.1", 5555)
     conn = ConnectionHandler()
     server.start(conn.new_connection)

@@ -47,7 +47,7 @@ class NativeFormat:
 
 class Screen:
     def __init__(self):
-        self.network = Networking("127.0.0.1", 5555)
+        self.network = Networking("192.168.56.1", 5555)
         self.buffer_text = ""
         self.user_temp = None
         self.win = tk.Tk()
