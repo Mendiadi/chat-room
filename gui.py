@@ -1,66 +1,32 @@
-import socket
-import threading
 import tkinter as tk
-import json
 from tkinter.scrolledtext import ScrolledText
-from tkinter import messagebox
-
-import user_model
-from communication import ConnectionProtocol
 
 
-class Networking(ConnectionProtocol):
-    def __init__(self, host, port):
-        super().__init__(host, port)
-        self._client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._client.connect((self.host, self.port))
-        self.logged_name = None
+import db_model
+from client_net import *
 
-    def request(self, method: str, data: [dict, object]):
-        if not isinstance(data, dict) and not isinstance(data, str):
-            data = data.to_json()
-        if self.logged_name:
-            data = {'name': self.logged_name, 'msg': data}
-        data_ = NativeFormat(method, data)
-
-        self._client.send(data_.pack())
-
-    @property
-    def client(self) -> socket.socket:
-        return self._client
-
-
-class RequestsMethods:
-    login = "login"
-    register = "register"
-    message = "msg"
-
-
-class NativeFormat:
-    def __init__(self, type: str, data: dict):
-        self.type = type
-        self.data = data
-
-    def pack(self):
-        return json.dumps(self.__dict__).encode()
 
 
 class Screen:
-    def __init__(self):
-        self.network = Networking("192.168.56.1", 5555)
+    def __init__(self, win, net):
+        self.network = net
         self.buffer_text = ""
-        self.user_temp = None
-        self.win = tk.Tk()
+        self.win = win
         self.win.geometry("700x700")
         self.win.title("Chat Room!")
-        self.win.configure(background="green")
-        self.send_btn = tk.Button(self.win, text="Send", command=self.send)
-        self.chat_entry = tk.Entry(self.win)
-        self.text_box = ScrolledText(self.win, state=tk.DISABLED)
-        self._job = None
-        self.login_frame()
+        self.win.maxsize(700, 700)
+        self.win.minsize(700, 700)
+        self.user_temp = None
 
-    def login_frame(self):
+    def run(self):
+        self.win.mainloop()
+
+
+class AuthenticationScreen(Screen):
+    def __init__(self, win, net):
+        super().__init__(win, net)
+        self.win.configure(background="green")
+        self._job = None
         ###################### LOGIN ###########################
 
         # ********* ENTRIES *******#
@@ -109,7 +75,24 @@ class Screen:
         self.log_in_btn.place(x=300, y=350)
         self.scan()
 
-    def destroy_login_frame(self):
+    def register(self):
+        user = self.get_user_pass_data()
+        self.network.request(RequestsMethods.register, user)
+
+    def login(self):
+        user = self.get_user_pass_data()
+        self.network.request(RequestsMethods.login, user)
+        self.user_temp = user.username
+
+    def get_user_pass_data(self) -> db_model.User:
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        self.username_entry.delete(0, "end")
+        self.password_entry.delete(0, "end")
+        user = db_model.User(username, password)
+        return user
+
+    def destroy(self):
         self.win.after_cancel(self._job)
         self.keep_me_log_in_btn.destroy()
         self.show_hide_btn.destroy()
@@ -159,63 +142,29 @@ class Screen:
             self.pass_shown = not self.pass_shown
             self.show_hide_btn.configure(text="show")
 
+
+class ChatScreen(Screen):
+    def __init__(self, win, net, user):
+        super().__init__(win, net)
+        self.send_btn = tk.Button(self.win, text="Send", command=self.send)
+        self.chat_entry = tk.Entry(self.win)
+        self.text_box = ScrolledText(self.win, state=tk.DISABLED)
+        self.user_temp = user
+        self.chat_screen()
+
     def send(self):
         self.network.request(RequestsMethods.message, self.chat_entry.get())
         self.chat_entry.delete(0, "end")
 
-    def response(self):
-        while True:
-            res = self.network.client.recv(1048).decode()
-            if res == "ok":
-                messagebox.showinfo(title="Register", message="YOU REGISTER COMPLETE")
-
-            elif "logged in" in res:
-                self.destroy_login_frame()
-                self.chat_screen()
-                self.network.logged_name = self.user_temp
-            elif res == "error":
-                print(res)
-            else:
-                if self.network.logged_name:
-                    self.buffer_text += res + "\n"
-                    self.text_box.config(state=tk.NORMAL)
-                    self.text_box.delete(1.0, "end")
-                    self.text_box.insert(1.0, self.buffer_text)
-                    self.text_box.config(state=tk.DISABLED)
-
     def chat_screen(self):
-        self.username_entry.destroy()
-        self.password_entry.destroy()
-        self.register_btn.destroy()
-        self.log_in_btn.destroy()
         self.text_box.pack()
         self.chat_entry.pack()
         self.send_btn.pack()
 
-    def get_user_pass_data(self) -> user_model.User:
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-        self.username_entry.delete(0, "end")
-        self.password_entry.delete(0, "end")
-        user = user_model.User(username, password)
-        return user
-
-    def register(self):
-        user = self.get_user_pass_data()
-        self.network.request(RequestsMethods.register, user)
-
-    def login(self):
-        user = self.get_user_pass_data()
-        self.network.request(RequestsMethods.login, user)
-        self.user_temp = user.username
-
-    def run(self):
-        thread_recv = threading.Thread(target=self.response, daemon=True)
-        thread_recv.start()
-
-        self.win.mainloop()
+    def destroy(self):
+        self.text_box.destroy()
+        self.chat_entry.destroy()
+        self.send_btn.destroy()
 
 
-if __name__ == '__main__':
-    a = Screen()
-    a.run()
+

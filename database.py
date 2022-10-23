@@ -1,6 +1,7 @@
 import os
+import hashlib
 
-from user_model import User
+from db_model import User
 import utils
 
 

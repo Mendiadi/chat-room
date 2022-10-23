@@ -1,3 +1,4 @@
+import hashlib
 import json
 import socket
 import threading
@@ -56,6 +57,7 @@ class ConnectionHandler:
 
     def handle_client_requests(self, client: socket.socket):
         client.send("Connected".encode())
+
         while True:
             try:
                 req = client.recv(self.buffer).decode()
@@ -64,17 +66,21 @@ class ConnectionHandler:
                 print(f"[Server] res = {req}")
                 req = json.loads(req)
                 if req["type"] == "register":
+                    hash_pass = hashlib.md5(req['data']['password'].encode()).hexdigest()
+                    req['data']['password'] = hash_pass
                     if req['data']['username'] not in self.db.users:
                         self.db.add(req["data"])
                         client.send("ok".encode())
                         self.db.commit()
                     else:
-                        client.send("error".encode())
+                        client.send("error,username exists".encode())
                 elif req["type"] == "login":
+                    hash_pass = hashlib.md5(req['data']['password'].encode()).hexdigest()
                     if req['data']['username'] not in self.db.users:
-                        client.send("error".encode())
-                    if req['data']['password'] != self.db.users.get(req['data']['username'])["password"]:
-                        client.send("error".encode())
+                        client.send("error,username not found".encode())
+                        continue
+                    if hash_pass != self.db.users.get(req['data']['username'])["password"]:
+                        client.send("error,password not match".encode())
                     else:
                         client.send(f"{req['data']['username']} logged in.".encode())
                 elif req["type"] == "msg":
@@ -90,6 +96,6 @@ class ConnectionHandler:
 
 
 if __name__ == '__main__':
-    server = BindingConnection("192.168.56.1", 5555)
+    server = BindingConnection("192.168.1.24", 5555)
     conn = ConnectionHandler()
     server.start(conn.new_connection)
