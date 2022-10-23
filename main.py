@@ -6,7 +6,7 @@ from gui import *
 class App:
     def __init__(self):
         self.win = tk.Tk()
-        self.network = Networking("192.168.1.24", 5555)
+        self.network = Networking("127.1.1.1", 5555)
         self.screen = AuthenticationScreen(self.win, self.network)
         self.thread_recv = threading.Thread(target=self.response, daemon=True)
 
