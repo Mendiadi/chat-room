@@ -3,6 +3,7 @@ import json
 import socket
 import threading
 
+import schemas
 from database import DataBase
 
 
@@ -73,14 +74,14 @@ class ConnectionHandler:
                         client.send("ok".encode())
                         self.db.commit()
                     else:
-                        client.send("error,username exists".encode())
+                        client.send(schemas.ErrorSchemas("error","username",schemas.ErrorInfo.USER_EXISTS).prepare_request().pack())
                 elif req["type"] == "login":
                     hash_pass = hashlib.md5(req['data']['password'].encode()).hexdigest()
                     if req['data']['username'] not in self.db.users:
-                        client.send("error,username not found".encode())
+                        client.send(schemas.ErrorSchemas("error","username",schemas.ErrorInfo.USER_NOT_FOUND).prepare_request().pack())
                         continue
                     if hash_pass != self.db.users.get(req['data']['username'])["password"]:
-                        client.send("error,password not match".encode())
+                        client.send(schemas.ErrorSchemas("error","password",schemas.ErrorInfo.PASSWORD_NOT_MATCH).prepare_request().pack())
                     else:
                         client.send(f"{req['data']['username']} logged in.".encode())
                 elif req["type"] == "msg":

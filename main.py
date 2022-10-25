@@ -3,6 +3,7 @@ from tkinter import messagebox
 
 
 from gui import *
+import schemas
 class App:
     def __init__(self):
         self.win = tk.Tk()
@@ -13,6 +14,7 @@ class App:
     def response(self):
         while True:
             res = self.network.client.recv(1048).decode()
+
             if res == "ok":
                 messagebox.showinfo(title="Register", message="YOU REGISTER COMPLETE")
 
@@ -21,13 +23,15 @@ class App:
                 self.network.logged_name = self.screen.user_temp
                 self.screen = ChatScreen(self.win, self.network, self.screen.user_temp)
 
-            elif "error," in res:
+            elif "error" in res:
+                res = schemas.NativeFormat(**json.loads(res))
+                res = schemas.ErrorSchemas(**res.data)
                 print(res)
-                if "username not found" in res:
+                if schemas.ErrorInfo.USER_NOT_FOUND in res.info:
                     messagebox.showerror(title="Login",message="Username Not Found")
-                elif "username exists" in res:
+                elif schemas.ErrorInfo.USER_EXISTS in res.info:
                     messagebox.showerror(title="Register", message="Username Already Exists")
-                elif "password not match" in res:
+                elif schemas.ErrorInfo.PASSWORD_NOT_MATCH in res.info:
                     messagebox.showerror(title="Login", message="Password Not Match")
             else:
                 if self.network.logged_name:

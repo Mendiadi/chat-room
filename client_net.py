@@ -1,6 +1,6 @@
 import socket
-import json
 
+from schemas import *
 from communication import ConnectionProtocol
 
 
@@ -24,17 +24,3 @@ class Networking(ConnectionProtocol):
     def client(self) -> socket.socket:
         return self._client
 
-
-class RequestsMethods:
-    login = "login"
-    register = "register"
-    message = "msg"
-
-
-class NativeFormat:
-    def __init__(self, type: str, data: dict):
-        self.type = type
-        self.data = data
-
-    def pack(self):
-        return json.dumps(self.__dict__).encode()
