@@ -26,13 +26,7 @@ class App:
             elif "error" in res:
                 res = schemas.NativeFormat(**json.loads(res))
                 res = schemas.ErrorSchemas(**res.data)
-                print(res)
-                if schemas.ErrorInfo.USER_NOT_FOUND in res.info:
-                    messagebox.showerror(title="Login",message="Username Not Found")
-                elif schemas.ErrorInfo.USER_EXISTS in res.info:
-                    messagebox.showerror(title="Register", message="Username Already Exists")
-                elif schemas.ErrorInfo.PASSWORD_NOT_MATCH in res.info:
-                    messagebox.showerror(title="Login", message="Password Not Match")
+                messagebox.showerror(res.reason,res.info)
             else:
                 if self.network.logged_name:
                     self.screen.buffer_text += res + "\n"
